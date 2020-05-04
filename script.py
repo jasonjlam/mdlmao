@@ -129,3 +129,73 @@ def run(filename):
             else:
                 save_extension(screen, args[0])
         print(command)
+
+
+def parse_stl_ascii( fname):
+
+    view = [0,
+            0,
+            1];
+    ambient = [50,
+               50,
+               50]
+    light = [[0.5,
+              0.75,
+              1],
+             [255,
+              255,
+              255]]
+
+    color = [0, 0, 0]
+    tmp = new_matrix()
+    ident( tmp )
+
+    stack = [ [x[:] for x in tmp] ]
+    screen = new_screen()
+    zbuffer = new_zbuffer()
+    tmp = []
+    f = open(fname)
+    lines = f.readlines()
+    clear_screen(screen)
+    clear_zbuffer(zbuffer)
+    step = 100
+    step_3d = 20
+
+    symbols = {'.meme': ['constants',
+                         {'red': [0.3, 0.77, 0.19],
+                          'green': [0.3, 0.56, 0.14],
+                          'blue': [0.3, 0.37, 0.09]}]}
+    c = 0
+    while c < len(lines):
+        line = lines[c].strip()
+        if line == "outer loop":
+            c+=1
+            arg0 = lines[c].strip().split(' ')
+            c+=1
+            arg1 = lines[c].strip().split(' ')
+            c+=1
+            arg2 = lines[c].strip().split(' ')
+            add_polygon(tmp, float(arg0[1]), float(arg0[2]), float(arg0[3]),
+                        float(arg1[1]), float(arg1[2]), float(arg1[3]), float(arg2[1]), float(arg2[2]), float(arg2[3]))
+        c+=1
+
+    t = make_translate(250, 60, 0)
+    matrix_mult(stack[-1], t)
+    stack[-1] = [x[:] for x in t]
+
+    t = make_scale(6, 6, 6)
+    matrix_mult(stack[-1], t)
+    stack[-1] = [x[:] for x in t]
+
+    t = make_rotY(-5.0 * (math.pi / 180))
+    matrix_mult(stack[-1], t)
+    stack[-1] = [x[:] for x in t]
+
+
+    t = make_rotX(-80.0 * (math.pi / 180))
+    matrix_mult(stack[-1], t)
+    stack[-1] = [x[:] for x in t]
+
+    matrix_mult(stack[-1], tmp)
+    draw_polygons(tmp, screen, zbuffer, view, ambient, light, symbols, '.meme')
+    display(screen)

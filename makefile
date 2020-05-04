@@ -6,3 +6,6 @@ clean:
 
 clear:
 	rm *pyc *out parsetab.py *ppm
+
+meme:
+	python main.py Eevee.stl 1
